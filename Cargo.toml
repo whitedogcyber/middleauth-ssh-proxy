@@ -1,0 +1,16 @@
+[package]
+name = "middleauth-ssh-proxy"
+description = "MiddleAuth SSH Proxy"
+authors = [
+    "Brynn Warner <brynn@whitedogcyber.com>"
+]
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+clap = "4.6"
+directories = "5.0"
+ssh-key = { version = "0.6", features = ["alloc"] }
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.8"
+ureq = { version = "3.4.2", features = ["json"] }
