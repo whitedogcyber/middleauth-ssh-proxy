@@ -1,6 +1,7 @@
 mod commands;
 pub mod middleauth;
 pub mod config;
+pub mod token_storage;
 
 use clap::{arg, Command};
 
@@ -21,6 +22,13 @@ fn cli() -> Command {
         .subcommand(
             Command::new("configure")
                 .about("SSH Proxy Configure")
+                .subcommand_required(true)
+                .subcommand(
+                    Command::new("init")
+                )
+                .subcommand(
+                    Command::new("auth")
+                )
 
         )
 }
