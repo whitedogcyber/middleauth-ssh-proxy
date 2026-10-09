@@ -8,8 +8,8 @@ const CREDENTIAL_KEY: &str = "session";
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TokenSession {
     pub access_token: String,
-    pub refresh_token: Option<String>,
-    pub expires_at_unix: Option<i64>,
+    pub refresh_token: String,
+    pub expires_at_unix: u64,
 }
 
 pub struct TokenStorage;

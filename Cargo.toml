@@ -14,5 +14,11 @@ ssh-key = { version = "0.6", features = ["alloc"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 toml = "1.1.6"
-ureq = { version = "3.4.2", features = ["json"] }
+reqwest = { version = "0.13", features = ["json"] }
 keyring = { version = "4.2" }
+
+tokio = { version = "1", features = ["full"] }
+openidconnect = {  version = "4.0", features = ["reqwest"] }
+url = "2.5"
+axum = "0.8" # Lightweight loopback listener
+open = "5.1" # Launches the default system browser

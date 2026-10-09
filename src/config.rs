@@ -6,11 +6,13 @@ use serde::{Deserialize, Serialize};
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Config {
     pub api_url: String,
+    pub client_id: Option<String>,
 }
 
 fn get_default_config() -> Config {
     Config{
         api_url: "https://auth.whitedog.cloud".to_string(),
+        client_id: None,
     }
 }
 
