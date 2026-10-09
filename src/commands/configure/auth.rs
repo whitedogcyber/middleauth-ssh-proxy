@@ -13,7 +13,8 @@ use openidconnect::reqwest;
 use crate::config::get_config;
 use crate::token_storage::{TokenSession, TokenStorage};
 
-const CLIENT_ID: &str = "client_id";
+// DEV_CLIENT_ID = "445a5d39ffbd4227b8d5cb9b5ef661a3"
+const CLIENT_ID: &str = "2bb77399c91c482e8d4cbd44002b207f";
 
 #[derive(serde::Deserialize)]
 struct AuthCallback {
