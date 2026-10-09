@@ -44,7 +44,7 @@ async fn auth_async(args: &ArgMatches) -> Result<(), Box<dyn std::error::Error>>
         .build()
         .expect("Client should build");
 
-    let provider_metadata = CoreProviderMetadata::discover_async(IssuerUrl::new(config.api_url.clone())?, &http_client).await?;
+    let provider_metadata = CoreProviderMetadata::discover_async(IssuerUrl::new(format!("{}/", config.api_url.as_str()))?, &http_client).await?;
 
     let client_id = ClientId::new(config.client_id.unwrap_or(CLIENT_ID.into()));
     let redirect_url = RedirectUrl::new("http://localhost:59080/callback".to_string())?;
@@ -110,6 +110,8 @@ async fn auth_async(args: &ArgMatches) -> Result<(), Box<dyn std::error::Error>>
                     };
 
                     TokenStorage::save_session(&session)?;
+
+                    println!("Authenticated successfully!");
                 }
                 Err(_) => println!("Authentication failed.")
             }

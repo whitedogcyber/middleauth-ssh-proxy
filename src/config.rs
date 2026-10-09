@@ -16,8 +16,8 @@ fn get_default_config() -> Config {
     }
 }
 
-fn get_config_dir() -> String {
-    env::var("MA_PROXY_CONFIG_DIR").unwrap_or_else(|_| {
+fn get_config_file_path() -> String {
+    env::var("MA_PROXY_CONFIG").unwrap_or_else(|_| {
         let base_dirs = BaseDirs::new().expect("Couldn't get base dirs");
         let config_dir = base_dirs.config_dir().join("whitedog").join("middleauth-ssh-proxy");
 
@@ -25,15 +25,10 @@ fn get_config_dir() -> String {
             std::fs::create_dir_all(config_dir.clone()).expect("Couldn't create config directory");
         }
 
-        config_dir.to_str().unwrap().to_string()
+        let config_file_path = Path::new(&config_dir).join("config.toml");
+
+        config_file_path.to_str().unwrap().to_string()
     })
-}
-
-fn get_config_file_path() -> String {
-    let config_dir = get_config_dir();
-    let config_file_path = Path::new(&config_dir).join("config.toml");
-
-    config_file_path.to_str().unwrap().to_string()
 }
 
 pub fn get_config() -> Config {
