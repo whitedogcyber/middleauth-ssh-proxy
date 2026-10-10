@@ -1,20 +1,18 @@
 use std::net::SocketAddr;
 use std::sync::Arc;
-use std::time::{Duration, SystemTime};
+use std::time::SystemTime;
 use axum::extract::Query;
 use axum::response::Html;
 use axum::Router;
 use axum::routing::get;
 use clap::ArgMatches;
-use openidconnect::core::{CoreAuthDisplay, CoreAuthPrompt, CoreClient, CoreGenderClaim, CoreJsonWebKey, CoreJweContentEncryptionAlgorithm, CoreProviderMetadata, CoreResponseType, CoreTokenIntrospectionResponse, CoreTokenResponse};
-use openidconnect::{AuthenticationFlow, AuthorizationCode, Client, ClientId, CsrfToken, EmptyAdditionalClaims, EndpointMaybeSet, EndpointNotSet, EndpointSet, IssuerUrl, Nonce, OAuth2TokenResponse, PkceCodeChallenge, PkceCodeVerifier, RedirectUrl, Scope, StandardErrorResponse};
+use openidconnect::core::{CoreClient, CoreProviderMetadata, CoreResponseType};
+use openidconnect::{AuthenticationFlow, AuthorizationCode, ClientId, CsrfToken, IssuerUrl, Nonce, OAuth2TokenResponse, PkceCodeChallenge, RedirectUrl, Scope, TokenResponse};
 use tokio::sync::oneshot;
 use openidconnect::reqwest;
 use crate::config::get_config;
+use crate::constants::CLIENT_ID;
 use crate::token_storage::{TokenSession, TokenStorage};
-
-// DEV_CLIENT_ID = "445a5d39ffbd4227b8d5cb9b5ef661a3"
-const CLIENT_ID: &str = "2bb77399c91c482e8d4cbd44002b207f";
 
 #[derive(serde::Deserialize)]
 struct AuthCallback {
@@ -105,6 +103,7 @@ async fn auth_async(args: &ArgMatches) -> Result<(), Box<dyn std::error::Error>>
 
                     let session = TokenSession {
                         access_token: token_response.access_token().secret().to_string(),
+                        id_token: token_response.id_token().expect("Missing id_token").to_string(),
                         refresh_token: token_response.refresh_token().expect("Missing refresh token").secret().to_string(),
                         expires_at_unix: expire_timestamp
                     };

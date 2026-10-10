@@ -2,6 +2,8 @@ mod commands;
 pub mod middleauth;
 pub mod config;
 pub mod token_storage;
+pub mod session;
+pub mod constants;
 
 use clap::{arg, Command};
 
