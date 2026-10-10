@@ -6,6 +6,13 @@ authors = [
 ]
 version = "0.1.0"
 edition = "2024"
+repository = "https://github.com/whitedogcyber/middleauth-ssh-proxy"
+
+[package.metadata.wix]
+upgrade-guid = "1C32E124-C1EC-4B72-879E-F43D15DCFB1C"
+path-guid = "2EC56B27-206F-4B12-999A-3CEB11CD87FB"
+license = false
+eula = false
 
 [dependencies]
 clap = "4.6"
@@ -22,3 +29,8 @@ openidconnect = {  version = "4.0", features = ["reqwest"] }
 url = "2.5"
 axum = "0.8" # Lightweight loopback listener
 open = "5.1" # Launches the default system browser
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"

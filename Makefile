@@ -1,55 +1,68 @@
 CARGO ?= cargo
-BINARY=middleauth-ssh-proxy
+BINARY := middleauth-ssh-proxy
 
 SOURCES := $(shell find src/ -type f -name '*.rs')
 CARGO_SOURCES := Cargo.toml .cargo/config.toml
 
-MACOS_BUILD_TARGETS = x86_64-apple-darwin aarch64-apple-darwin
-MACOS_TARGETS = $(MACOS_BUILD_TARGETS) universal-apple-darwin
-LINUX_TARGETS = x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu
-WINDOWS_TARGETS = x86_64-pc-windows-gnu #aarch64-pc-windows-gnullvm
+# Target Configurations
+MACOS_BUILD_TARGETS := x86_64-apple-darwin aarch64-apple-darwin
+MACOS_TARGETS       := $(MACOS_BUILD_TARGETS) universal-apple-darwin
+LINUX_TARGETS       := x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu
+WINDOWS_TARGETS     := x86_64-pc-windows-gnu
 
-UNIX_BUILD_TARGETS = ${MACOS_BUILD_TARGETS} ${LINUX_TARGETS}
-BUILD_TARGETS = ${UNIX_BUILD_TARGETS} ${WINDOWS_TARGETS}
-TARGETS = $(MACOS_TARGETS) ${LINUX_TARGETS} ${WINDOWS_TARGETS}
+UNIX_BUILD_TARGETS  := $(MACOS_BUILD_TARGETS) $(LINUX_TARGETS)
+TARGETS             := $(MACOS_TARGETS) $(LINUX_TARGETS) $(WINDOWS_TARGETS)
 
-LINUX_TARGET_BINARIES = $(patsubst %,target/%/release/${BINARY},${LINUX_TARGETS})
-MACOS_TARGET_BINARIES = $(patsubst %,target/%/release/${BINARY},${MACOS_BUILD_TARGETS})
-UNIX_TARGET_BINARIES = ${LINUX_TARGET_BINARIES} ${MACOS_TARGET_BINARIES}
-WINDOWS_TARGET_BINARIES = $(patsubst %,target/%/release/${BINARY}.exe,${WINDOWS_TARGETS})
-TARGET_BINARIES = ${UNIX_TARGET_BINARIES} ${WINDOWS_TARGET_BINARIES}
+# Binary Paths mapping
+LINUX_TARGET_BINARIES   := $(patsubst %,target/%/release/$(BINARY),$(LINUX_TARGETS))
+MACOS_TARGET_BINARIES   := $(patsubst %,target/%/release/$(BINARY),$(MACOS_BUILD_TARGETS))
+WINDOWS_TARGET_BINARIES := $(patsubst %,target/%/release/$(BINARY).exe,$(WINDOWS_TARGETS))
+TARGET_BINARIES         := $(MACOS_TARGET_BINARIES) $(LINUX_TARGET_BINARIES) $(WINDOWS_TARGET_BINARIES)
 
-.PHONY: clean
+.PHONY: clean default native-debug native-release release release-macos release-linux release-windows $(TARGETS)
 
 default: native-debug
 
-native-debug: target/debug/${BINARY}
-native-release: target/release/${BINARY}
+# Shortcut aliases to match your targets list
+$(UNIX_BUILD_TARGETS): %: target/%/release/$(BINARY)
+$(WINDOWS_TARGET_TARGETS): %: target/%/release/$(BINARY).exe
 
-target/debug/${BINARY}: ${SOURCES} ${CARGO_SOURCES}
+# ==============================================================================
+# STATIC PATTERN RULES (Replaces foreach/eval/call)
+# ==============================================================================
+
+# Matches all UNIX binary file paths and extracts the target architecture via %
+$(LINUX_TARGET_BINARIES) $(MACOS_TARGET_BINARIES): target/%/release/$(BINARY): $(SOURCES) $(CARGO_SOURCES)
+	@echo "Running build for target: $*"
+	$(CARGO) build --target=$* --release
+
+# Matches all Windows binary file paths
+$(WINDOWS_TARGET_BINARIES): target/%/release/$(BINARY).exe: $(SOURCES) $(CARGO_SOURCES)
+	@echo "Running build for target: $*"
+	$(CARGO) build --target=$* --release
+
+# ==============================================================================
+# STANDARD & COMBINED TARGETS
+# ==============================================================================
+
+native-debug: target/debug/$(BINARY)
+target/debug/$(BINARY): $(SOURCES) $(CARGO_SOURCES)
 	$(CARGO) build
 
-target/release/${BINARY}: ${SOURCES} ${CARGO_SOURCES}
+native-release: target/release/$(BINARY)
+target/release/$(BINARY): $(SOURCES) $(CARGO_SOURCES)
 	$(CARGO) build --release
 
+universal-apple-darwin: target/universal-apple-darwin/release/$(BINARY)
+target/universal-apple-darwin/release/$(BINARY): $(MACOS_TARGET_BINARIES)
+	@mkdir -p target/universal-apple-darwin/release
+	lipo -create -o $@ $^
 
+# Meta compilation targets
 release: $(TARGETS)
-release-macos: $(MACOS_TARGETS)
-release-linux: $(LINUX_TARGETS)
-release-windows: $(WINDOWS_TARGETS)
-
-universal-apple-darwin: target/universal-apple-darwin/release/${BINARY}
-target/universal-apple-darwin/release/${BINARY}: $(MACOS_TARGET_BINARIES)
-	mkdir -p target/universal-apple-darwin/release
-	lipo -create -o target/universal-apple-darwin/release/${BINARY} ${MACOS_TARGET_BINARIES}
-
-$(UNIX_BUILD_TARGETS): target/%/release/${BINARY}: ${SOURCES} ${CARGO_SOURCES}
-	@echo "Running job for target: $*"
-    $(CARGO) build --target=$* --release
-
-$(WINDOWS_TARGETS): target/%/release/${BINARY}.exe: ${SOURCES} ${CARGO_SOURCES}
-	@echo "Running job for target: $*"
-    $(CARGO) build --target=$* --release
+release-macos: $(MACOS_TARGET_BINARIES) universal-apple-darwin
+release-linux: $(LINUX_TARGET_BINARIES)
+release-windows: $(WINDOWS_TARGET_BINARIES)
 
 clean:
-	rm -r target
+	rm -rf target

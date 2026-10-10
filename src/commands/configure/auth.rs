@@ -33,7 +33,7 @@ pub fn auth(args: &ArgMatches) {
         .block_on(auth_async(args)).expect("Failed to run auth");
 }
 
-async fn auth_async(args: &ArgMatches) -> Result<(), Box<dyn std::error::Error>> {
+async fn auth_async(_args: &ArgMatches) -> Result<(), Box<dyn std::error::Error>> {
     let config = get_config();
 
     let http_client = reqwest::ClientBuilder::new()
